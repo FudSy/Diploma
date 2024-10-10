@@ -1,2 +1,5 @@
 *.exe
 *.env
+*.log
+*.tmp
+.vscode/
