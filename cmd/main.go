@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"errors"
 	"os"
 	"os/signal"
 	"syscall"
 
+	_ "github.com/FudSy/Diploma/docs"
 	"github.com/FudSy/Diploma/internal/pkg/handler"
 	"github.com/FudSy/Diploma/internal/pkg/models"
 	"github.com/FudSy/Diploma/internal/pkg/repository"
@@ -17,13 +19,20 @@ import (
 	"github.com/spf13/viper"
 )
 
+// @title Diploma API
+// @version 1.0
+// @description API for authentication, resources, and bookings.
+// @BasePath /
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func main() {
 
 	if err := initConfig(); err != nil {
 		log.Fatal().Msgf("error initializing configs: %s", err.Error())
 	}
 
-	if err := godotenv.Load(); err != nil {
+	if err := godotenv.Load(); err != nil && !errors.Is(err, os.ErrNotExist) {
 		log.Fatal().Msgf("error loading env variables: %s", err.Error())
 	}
 
@@ -40,11 +49,10 @@ func main() {
 	}
 
 	db.AutoMigrate(
-	&models.User{},
-	&models.Resource{},
-	&models.Booking{},
+		&models.User{},
+		&models.Resource{},
+		&models.Booking{},
 	)
-
 
 	repos := repository.NewRepository(db)
 	services := service.NewService(repos)
