@@ -1,0 +1,11 @@
+.git
+.gitignore
+.idea
+.vscode
+tmp
+bin
+postman
+*.log
+*.md
+frontend/node_modules
+frontend/dist
