@@ -7,14 +7,16 @@ import (
 )
 
 type User struct {
-	ID            uuid.UUID `gorm:"type:uuid;primaryKey"`
-	Login         string    `gorm:"unique;not null"`
-	Email         string    `gorm:"unique;not null"`
+	ID           uuid.UUID `gorm:"type:uuid;primaryKey"`
+	Login        string    `gorm:"unique;not null"`
+	Email        string    `gorm:"unique;not null"`
+	Name         string    `gorm:"not null;default:''"`
+	Surname      string    `gorm:"not null;default:''"`
 	PasswordHash string    `gorm:"not null"`
 	FullName     string    `gorm:"not null"`
-	Role          string    `gorm:"type:varchar(20);default:'USER'"`
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
+	Role         string    `gorm:"type:varchar(20);default:'USER'"`
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 
 	Bookings []Booking `gorm:"foreignKey:UserID"`
 }
@@ -26,14 +28,13 @@ func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
 	return
 }
 
-
 type Resource struct {
 	ID          uuid.UUID `gorm:"type:uuid;primaryKey"`
 	Name        string    `gorm:"not null"`
 	Description string
-	Type        string    `gorm:"type:varchar(50);not null"`
+	Type        string `gorm:"type:varchar(50);not null"`
 	Capacity    int
-	IsActive    bool      `gorm:"default:true"`
+	IsActive    bool `gorm:"default:true"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 
@@ -46,7 +47,6 @@ func (r *Resource) BeforeCreate(tx *gorm.DB) (err error) {
 	}
 	return
 }
-
 
 type Booking struct {
 	ID         uuid.UUID `gorm:"type:uuid;primaryKey"`
@@ -67,7 +67,6 @@ func (b *Booking) BeforeCreate(tx *gorm.DB) (err error) {
 	}
 	return
 }
-
 
 type UpdateResourceInput struct {
 	Name        *string `gorm:"column:name"`

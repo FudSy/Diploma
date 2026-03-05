@@ -39,7 +39,7 @@ func TestAuthService_CreateUser_Duplicate(t *testing.T) {
 	svc := NewAuthService(repo)
 
 	_, err := svc.CreateUser(dto.RegisterRequest{
-		Login: "user1", Email: "u1@example.com", Password: "secret12",
+		Login: "user1", Email: "u1@example.com", Name: "Ivan", Surname: "Petrov", Password: "secret12",
 	})
 	if err == nil {
 		t.Fatal("expected duplicate error, got nil")
@@ -59,7 +59,7 @@ func TestAuthService_CreateAdmin_SetsRole(t *testing.T) {
 	svc := NewAuthService(repo)
 
 	_, err := svc.CreateAdmin(dto.RegisterRequest{
-		Login: "admin1", Email: "a1@example.com", Password: "secret12",
+		Login: "admin1", Email: "a1@example.com", Name: "Anna", Surname: "Smirnova", Password: "secret12",
 	})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)

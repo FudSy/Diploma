@@ -31,8 +31,10 @@ func ResourceToResponse(r models.Resource) ResourceResponse {
 // UserToMeResponse конвертирует модель User в DTO для /auth/me
 func UserToMeResponse(u models.User) MeResponse {
 	return MeResponse{
-		ID:    u.ID,
-		Email: u.Email,
-		Role:  u.Role,
+		ID:      u.ID,
+		Email:   u.Email,
+		Name:    u.Name,
+		Surname: u.Surname,
+		Role:    u.Role,
 	}
 }

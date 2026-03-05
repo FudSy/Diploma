@@ -118,9 +118,21 @@ func newTestHandler(userID, adminID uuid.UUID, bookingOwnerID uuid.UUID) *Handle
 		getUserByIDFn: func(id uuid.UUID) (dto.User, error) {
 			switch id {
 			case userID:
-				return dto.User{ID: userID, Role: "USER", Email: "user@example.com"}, nil
+				return dto.User{
+					ID:      userID,
+					Role:    "USER",
+					Email:   "user@example.com",
+					Name:    "Ivan",
+					Surname: "Petrov",
+				}, nil
 			case adminID:
-				return dto.User{ID: adminID, Role: "ADMIN", Email: "admin@example.com"}, nil
+				return dto.User{
+					ID:      adminID,
+					Role:    "ADMIN",
+					Email:   "admin@example.com",
+					Name:    "Anna",
+					Surname: "Smirnova",
+				}, nil
 			default:
 				return dto.User{}, errors.New("user not found")
 			}
@@ -195,6 +207,30 @@ func TestInitRoutes_ProtectedEndpointRequiresToken(t *testing.T) {
 	w := performRequest(h.InitRoutes(), http.MethodGet, "/auth/me", nil, "")
 	if w.Code != http.StatusUnauthorized {
 		t.Fatalf("expected 401, got %d", w.Code)
+	}
+}
+
+func TestInitRoutes_MeReturnsNameAndSurname(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	userID := uuid.New()
+	adminID := uuid.New()
+	h := newTestHandler(userID, adminID, userID)
+
+	w := performRequest(h.InitRoutes(), http.MethodGet, "/auth/me", nil, "token-user")
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d", w.Code)
+	}
+
+	var resp dto.MeResponse
+	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("failed to unmarshal response: %v", err)
+	}
+
+	if resp.Name != "Ivan" {
+		t.Fatalf("expected name Ivan, got %q", resp.Name)
+	}
+	if resp.Surname != "Petrov" {
+		t.Fatalf("expected surname Petrov, got %q", resp.Surname)
 	}
 }
 

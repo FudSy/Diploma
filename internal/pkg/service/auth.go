@@ -59,7 +59,9 @@ func (s *AuthService) createWithRole(input dto.RegisterRequest, role string) (uu
 		Login:        input.Login,
 		PasswordHash: string(hash),
 		Email:        input.Email,
-		FullName:     input.Login,
+		Name:         input.Name,
+		Surname:      input.Surname,
+		FullName:     strings.TrimSpace(input.Name + " " + input.Surname),
 		Role:         role,
 	}
 

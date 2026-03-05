@@ -5,6 +5,8 @@ import "github.com/google/uuid"
 type RegisterRequest struct {
 	Login    string `json:"login" binding:"required"`
 	Email    string `json:"email" binding:"required"`
+	Name     string `json:"name" binding:"required"`
+	Surname  string `json:"surname" binding:"required"`
 	Password string `json:"password" binding:"required,min=6"`
 }
 
@@ -24,15 +26,19 @@ type LoginResponse struct {
 }
 
 type MeResponse struct {
-	ID    uuid.UUID `json:"id"`
-	Email string    `json:"email"`
-	Role  string    `json:"role"`
+	ID      uuid.UUID `json:"id"`
+	Email   string    `json:"email"`
+	Name    string    `json:"name"`
+	Surname string    `json:"surname"`
+	Role    string    `json:"role"`
 }
 
 type User struct {
 	ID           uuid.UUID
 	Login        string
 	Email        string
+	Name         string
+	Surname      string
 	PasswordHash string
 	FullName     string
 	Role         string
