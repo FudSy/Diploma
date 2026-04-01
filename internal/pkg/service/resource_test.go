@@ -13,6 +13,7 @@ type resourceRepoMock struct {
 	getAllFn           func() ([]dto.ResourceResponse, error)
 	getByIDFn          func(id uuid.UUID) (dto.ResourceResponse, error)
 	updateFn           func(id uuid.UUID, input dto.UpdateResourceRequest) error
+	updatePhotoFn      func(id uuid.UUID, photoURL string) error
 	increaseCapacityFn func(id uuid.UUID, delta int) error
 	decreaseCapacityFn func(id uuid.UUID, delta int) error
 	deleteFn           func(id uuid.UUID) error
@@ -40,6 +41,13 @@ func (m *resourceRepoMock) IncreaseCapacity(id uuid.UUID, delta int) error {
 
 func (m *resourceRepoMock) DecreaseCapacity(id uuid.UUID, delta int) error {
 	return m.decreaseCapacityFn(id, delta)
+}
+
+func (m *resourceRepoMock) UpdatePhoto(id uuid.UUID, photoURL string) error {
+	if m.updatePhotoFn != nil {
+		return m.updatePhotoFn(id, photoURL)
+	}
+	return nil
 }
 
 func (m *resourceRepoMock) Delete(id uuid.UUID) error {

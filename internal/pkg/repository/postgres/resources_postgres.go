@@ -24,6 +24,7 @@ func (r *ResourcePostgres) Create(resource dto.CreateResourceRequest) (uuid.UUID
 		Type:        resource.Type,
 		Capacity:    resource.Capacity,
 		IsActive:    true,
+		Location:    resource.Location,
 	}
 	if resource.IsActive != nil {
 		modelResource.IsActive = *resource.IsActive
@@ -74,6 +75,9 @@ func (r *ResourcePostgres) Update(id uuid.UUID, input dto.UpdateResourceRequest)
 	if input.IsActive != nil {
 		updates["is_active"] = *input.IsActive
 	}
+	if input.Location != nil {
+		updates["location"] = *input.Location
+	}
 
 	if len(updates) == 0 {
 		return nil
@@ -119,7 +123,20 @@ func (r *ResourcePostgres) DecreaseCapacity(id uuid.UUID, delta int) error {
 		return gorm.ErrRecordNotFound
 	}
 
-	return errors.New("insufficient resource capacity")
+	return errors.New("недостаточная вместимость ресурса")
+}
+
+func (r *ResourcePostgres) UpdatePhoto(id uuid.UUID, photoURL string) error {
+	result := r.db.Model(&models.Resource{}).
+		Where("id = ?", id).
+		Update("photo_url", photoURL)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
 }
 
 func (r *ResourcePostgres) Delete(id uuid.UUID) error {

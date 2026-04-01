@@ -19,7 +19,7 @@ func NewBookingService(b repository.Booking, r repository.Resource) *BookingServ
 
 func (s *BookingService) Create(userID uuid.UUID, input dto.CreateBookingRequest) (uuid.UUID, error) {
 	if !input.StartTime.After(time.Now()) {
-		return uuid.Nil, errors.New("start_time must be in the future")
+		return uuid.Nil, errors.New("время начала бронирования должно быть в будущем")
 	}
 
 	hasOverlap, err := s.bookingRepo.HasTimeOverlap(input.ResourceID, input.StartTime, input.EndTime)
@@ -27,7 +27,7 @@ func (s *BookingService) Create(userID uuid.UUID, input dto.CreateBookingRequest
 		return uuid.Nil, err
 	}
 	if hasOverlap {
-		return uuid.Nil, errors.New("booking time overlaps with an existing booking")
+		return uuid.Nil, errors.New("время бронирования пересекается с существующим")
 	}
 
 	return s.bookingRepo.Create(userID, input)

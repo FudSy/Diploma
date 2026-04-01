@@ -6,9 +6,10 @@ import "github.com/google/uuid"
 type CreateResourceRequest struct {
 	Name        string `json:"name" binding:"required"`
 	Description string `json:"description"`
-	Type        string `json:"type" binding:"required,oneof=MEETING_ROOM CAR DEVICE"`
+	Type        string `json:"type" binding:"required"`
 	Capacity    int    `json:"capacity" binding:"required,min=1"`
 	IsActive    *bool  `json:"is_active"`
+	Location    string `json:"location"`
 }
 
 type UpdateResourceRequest struct {
@@ -17,6 +18,7 @@ type UpdateResourceRequest struct {
 	Type        *string `json:"type"`
 	Capacity    *int    `json:"capacity"`
 	IsActive    *bool   `json:"is_active"`
+	Location    *string `json:"location"`
 }
 
 type ResourceResponse struct {
@@ -26,4 +28,6 @@ type ResourceResponse struct {
 	Type        string    `json:"type"`
 	Capacity    int       `json:"capacity"`
 	IsActive    bool      `json:"is_active"`
+	Location    string    `json:"location"`
+	PhotoURL    string    `json:"photo_url"`
 }

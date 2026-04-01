@@ -17,6 +17,7 @@ func NewHandler(services *service.Service) *Handler {
 
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
+	router.Static("/uploads", "./uploads")
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	auth := router.Group("/auth")
@@ -50,6 +51,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		resourceAdmin.DELETE("/:id", h.deleteResource)
 		resourceAdmin.PATCH("/:id/capacity/increase", h.increaseResourceCapacity)
 		resourceAdmin.PATCH("/:id/capacity/decrease", h.decreaseResourceCapacity)
+		resourceAdmin.POST("/:id/photo", h.uploadResourcePhoto)
 	}
 
 	bookings := router.Group("/bookings", h.userIdentity)
@@ -60,5 +62,19 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		bookings.PUT("/:id", h.updateBooking)
 		bookings.DELETE("/:id", h.deleteBooking)
 	}
+
+	resourceTypes := router.Group("/resource-types", h.userIdentity)
+	{
+		resourceTypes.GET("/", h.getResourceTypes)
+	}
+
+	resourceTypesAdmin := router.Group("/resource-types", h.userIdentity, h.adminIdentity)
+	{
+		resourceTypesAdmin.POST("/", h.createResourceType)
+		resourceTypesAdmin.DELETE("/:id", h.deleteResourceType)
+		resourceTypesAdmin.POST("/:id/options", h.addResourceTypeOption)
+		resourceTypesAdmin.DELETE("/:id/options/:optionId", h.deleteResourceTypeOption)
+	}
+
 	return router
 }

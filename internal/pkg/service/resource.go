@@ -36,9 +36,13 @@ func (s *ResourceService) Update(id uuid.UUID, input dto.UpdateResourceRequest) 
 	return s.repo.Update(id, input)
 }
 
+func (s *ResourceService) UpdatePhoto(id uuid.UUID, photoURL string) error {
+	return s.repo.UpdatePhoto(id, photoURL)
+}
+
 func (s *ResourceService) IncreaseCapacity(id uuid.UUID, delta int) error {
 	if delta <= 0 {
-		return errors.New("capacity increment must be greater than 0")
+		return errors.New("прирост вместимости должен быть больше нуля")
 	}
 
 	return s.repo.IncreaseCapacity(id, delta)
@@ -46,7 +50,7 @@ func (s *ResourceService) IncreaseCapacity(id uuid.UUID, delta int) error {
 
 func (s *ResourceService) DecreaseCapacity(id uuid.UUID, delta int) error {
 	if delta <= 0 {
-		return errors.New("capacity decrement must be greater than 0")
+		return errors.New("уменьшение вместимости должно быть больше нуля")
 	}
 
 	return s.repo.DecreaseCapacity(id, delta)

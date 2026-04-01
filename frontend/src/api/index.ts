@@ -1,5 +1,5 @@
-import { apiRequest } from "./client";
-import type { Booking, LoginRequest, MeResponse, RegisterRequest, Resource } from "../types";
+import { apiRequest, apiUpload } from "./client";
+import type { Booking, LoginRequest, MeResponse, RegisterRequest, Resource, ResourceType } from "../types";
 
 interface TokenResponse {
   token: string;
@@ -33,8 +33,18 @@ export function createResource(token: string, payload: Omit<Resource, "id">): Pr
   return apiRequest<IdResponse>("/resources/", { method: "POST", token, body: payload });
 }
 
+export function updateResource(token: string, id: string, payload: Partial<Omit<Resource, "id">>): Promise<{ status: string }> {
+  return apiRequest<{ status: string }>(`/resources/${id}`, { method: "PUT", token, body: payload });
+}
+
 export function deleteResource(token: string, id: string): Promise<{ status: string }> {
   return apiRequest<{ status: string }>(`/resources/${id}`, { method: "DELETE", token });
+}
+
+export function uploadResourcePhoto(token: string, id: string, file: File): Promise<{ photo_url: string }> {
+  const formData = new FormData();
+  formData.append("photo", file);
+  return apiUpload<{ photo_url: string }>(`/resources/${id}/photo`, token, formData);
 }
 
 export function getBookings(token: string): Promise<Booking[]> {
@@ -58,4 +68,36 @@ export function updateBooking(
 
 export function deleteBooking(token: string, id: string): Promise<{ status: string }> {
   return apiRequest<{ status: string }>(`/bookings/${id}`, { method: "DELETE", token });
+}
+
+export function getResourceTypes(token: string): Promise<ResourceType[]> {
+  return apiRequest<ResourceType[]>("/resource-types/", { token });
+}
+
+export function createResourceType(
+  token: string,
+  name: string,
+  options?: { name: string; option_type: string; is_required: boolean }[]
+): Promise<{ id: string }> {
+  return apiRequest<{ id: string }>("/resource-types/", { method: "POST", token, body: { name, options } });
+}
+
+export function deleteResourceType(token: string, id: string): Promise<{ status: string }> {
+  return apiRequest<{ status: string }>(`/resource-types/${id}`, { method: "DELETE", token });
+}
+
+export function addResourceTypeOption(
+  token: string,
+  resourceTypeId: string,
+  option: { name: string; option_type: string; is_required: boolean }
+): Promise<{ id: string }> {
+  return apiRequest<{ id: string }>(`/resource-types/${resourceTypeId}/options`, { method: "POST", token, body: option });
+}
+
+export function deleteResourceTypeOption(
+  token: string,
+  resourceTypeId: string,
+  optionId: string
+): Promise<{ status: string }> {
+  return apiRequest<{ status: string }>(`/resource-types/${resourceTypeId}/options/${optionId}`, { method: "DELETE", token });
 }

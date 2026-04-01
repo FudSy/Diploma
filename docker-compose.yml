@@ -27,6 +27,7 @@ services:
       AUTH_SIGNING_KEY: local-dev-signing-key
     volumes:
       - ./docker/config.yml:/app/internal/configs/config.yml:ro
+      - uploads_data:/app/uploads
     depends_on:
       postgres:
         condition: service_healthy
@@ -43,7 +44,10 @@ services:
       - "80:80"
     depends_on:
       - backend
+    volumes:
+      - uploads_data:/app/uploads:ro
     restart: unless-stopped
 
 volumes:
   postgres_data:
+  uploads_data:

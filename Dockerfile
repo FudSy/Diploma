@@ -17,6 +17,8 @@ RUN addgroup -S app && adduser -S app -G app
 COPY --from=builder /bin/diploma /app/diploma
 COPY internal/configs /app/internal/configs
 
+RUN mkdir -p /app/uploads/resources && chown -R app:app /app/uploads
+
 USER app
 
 EXPOSE 8080

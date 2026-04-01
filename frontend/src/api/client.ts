@@ -8,6 +8,31 @@ interface ApiOptions {
   body?: unknown;
 }
 
+export async function apiUpload<T>(path: string, token: string, formData: FormData): Promise<T> {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`
+    },
+    credentials: "include",
+    body: formData
+  });
+
+  if (!response.ok) {
+    const fallback = `HTTP ${response.status}`;
+    let message = fallback;
+    try {
+      const data = (await response.json()) as { message?: string };
+      if (data.message) message = data.message;
+    } catch {
+      // ignore
+    }
+    throw new Error(message);
+  }
+
+  return (await response.json()) as T;
+}
+
 export async function apiRequest<T>(path: string, options: ApiOptions = {}): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     method: options.method ?? "GET",

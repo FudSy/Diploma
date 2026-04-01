@@ -76,6 +76,10 @@ func (m *resourceSvcMock) DecreaseCapacity(id uuid.UUID, delta int) error {
 	return m.decreaseCapacityFn(id, delta)
 }
 
+func (m *resourceSvcMock) UpdatePhoto(id uuid.UUID, photoURL string) error {
+	return nil
+}
+
 type bookingSvcMock struct {
 	createFn  func(userID uuid.UUID, input dto.CreateBookingRequest) (uuid.UUID, error)
 	getAllFn  func(userID uuid.UUID) ([]dto.BookingResponse, error)
@@ -99,6 +103,20 @@ func (m *bookingSvcMock) Update(userID, bookingID uuid.UUID, input dto.UpdateBoo
 func (m *bookingSvcMock) Delete(userID, bookingID uuid.UUID) error {
 	return m.deleteFn(userID, bookingID)
 }
+
+type resourceTypeSvcMock struct{}
+
+func (m *resourceTypeSvcMock) Create(name string, options []dto.ResourceTypeOptionRequest) (uuid.UUID, error) {
+	return uuid.New(), nil
+}
+func (m *resourceTypeSvcMock) GetAll() ([]dto.ResourceTypeResponse, error) {
+	return []dto.ResourceTypeResponse{}, nil
+}
+func (m *resourceTypeSvcMock) Delete(id uuid.UUID) error { return nil }
+func (m *resourceTypeSvcMock) AddOption(resourceTypeID uuid.UUID, option dto.ResourceTypeOptionRequest) (uuid.UUID, error) {
+	return uuid.New(), nil
+}
+func (m *resourceTypeSvcMock) DeleteOption(optionID uuid.UUID) error { return nil }
 
 func newTestHandler(userID, adminID uuid.UUID, bookingOwnerID uuid.UUID) *Handler {
 	auth := &authSvcMock{
@@ -174,6 +192,7 @@ func newTestHandler(userID, adminID uuid.UUID, bookingOwnerID uuid.UUID) *Handle
 		Authorization: auth,
 		Resource:      res,
 		Booking:       book,
+		ResourceType:  &resourceTypeSvcMock{},
 	})
 }
 

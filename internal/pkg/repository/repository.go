@@ -19,6 +19,7 @@ type Resource interface {
 	GetAll() ([]dto.ResourceResponse, error)
 	GetById(id uuid.UUID) (dto.ResourceResponse, error)
 	Update(id uuid.UUID, input dto.UpdateResourceRequest) error
+	UpdatePhoto(id uuid.UUID, photoURL string) error
 	IncreaseCapacity(id uuid.UUID, delta int) error
 	DecreaseCapacity(id uuid.UUID, delta int) error
 	Delete(id uuid.UUID) error
@@ -33,10 +34,19 @@ type Booking interface {
 	Delete(id uuid.UUID) error
 }
 
+type ResourceType interface {
+	Create(name string, options []dto.ResourceTypeOptionRequest) (uuid.UUID, error)
+	GetAll() ([]dto.ResourceTypeResponse, error)
+	Delete(id uuid.UUID) error
+	AddOption(resourceTypeID uuid.UUID, option dto.ResourceTypeOptionRequest) (uuid.UUID, error)
+	DeleteOption(optionID uuid.UUID) error
+}
+
 type Repository struct {
 	Authorization
 	Resource
 	Booking
+	ResourceType
 }
 
 func NewRepository(db *gorm.DB) *Repository {
@@ -44,5 +54,6 @@ func NewRepository(db *gorm.DB) *Repository {
 		Authorization: NewAuthPostgres(db),
 		Resource:      NewResourcePostgres(db),
 		Booking:       NewBookingPostgres(db),
+		ResourceType:  NewResourceTypePostgres(db),
 	}
 }

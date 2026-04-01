@@ -34,7 +34,9 @@ type Resource struct {
 	Description string
 	Type        string `gorm:"type:varchar(50);not null"`
 	Capacity    int
-	IsActive    bool `gorm:"default:true"`
+	IsActive    bool   `gorm:"default:true"`
+	Location    string `gorm:"type:varchar(255)"`
+	PhotoURL    string `gorm:"type:varchar(512)"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 
@@ -74,10 +76,39 @@ type UpdateResourceInput struct {
 	Type        *string
 	Capacity    *int
 	IsActive    *bool
+	Location    *string
 }
 
 type UpdateBookingInput struct {
 	StartTime *time.Time
 	EndTime   *time.Time
 	Status    *string
+}
+
+type ResourceType struct {
+	ID      uuid.UUID            `gorm:"type:uuid;primaryKey"`
+	Name    string               `gorm:"type:varchar(50);unique;not null"`
+	Options []ResourceTypeOption `gorm:"foreignKey:ResourceTypeID;constraint:OnDelete:CASCADE"`
+}
+
+func (rt *ResourceType) BeforeCreate(tx *gorm.DB) (err error) {
+	if rt.ID == uuid.Nil {
+		rt.ID = uuid.New()
+	}
+	return
+}
+
+type ResourceTypeOption struct {
+	ID             uuid.UUID `gorm:"type:uuid;primaryKey"`
+	ResourceTypeID uuid.UUID `gorm:"type:uuid;not null;index"`
+	Name           string    `gorm:"type:varchar(100);not null"`
+	OptionType     string    `gorm:"type:varchar(20);not null;default:'text'"` // text, number, boolean
+	IsRequired     bool      `gorm:"default:false"`
+}
+
+func (o *ResourceTypeOption) BeforeCreate(tx *gorm.DB) (err error) {
+	if o.ID == uuid.Nil {
+		o.ID = uuid.New()
+	}
+	return
 }

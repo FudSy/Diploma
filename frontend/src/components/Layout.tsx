@@ -1,4 +1,4 @@
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useLocation } from "react-router-dom";
 import type { MeResponse } from "../types";
 
 interface LayoutProps {
@@ -8,17 +8,18 @@ interface LayoutProps {
 
 export function Layout({ user, onLogout }: LayoutProps) {
   const roleLabel = user.role === "ADMIN" ? "Администратор" : "Пользователь";
+  const { pathname } = useLocation();
 
   return (
     <div className="app-shell">
       <header className="topbar">
-        <div>
+        <div className="topbar-brand">
           <h1>Система бронирования</h1>
-          <p>{user.name} {user.surname} ({roleLabel})</p>
+          <p>{user.name} {user.surname} &middot; {roleLabel}</p>
         </div>
         <nav>
-          <Link to="/resources">Ресурсы</Link>
-          <Link to="/bookings">Бронирования</Link>
+          <Link to="/resources" className={pathname.startsWith("/resources") ? "active" : ""}>Ресурсы</Link>
+          <Link to="/bookings" className={pathname.startsWith("/bookings") ? "active" : ""}>Бронирования</Link>
           <button onClick={onLogout}>Выйти</button>
         </nav>
       </header>

@@ -25,6 +25,8 @@ func ResourceToResponse(r models.Resource) ResourceResponse {
 		Type:        r.Type,
 		Capacity:    r.Capacity,
 		IsActive:    r.IsActive,
+		Location:    r.Location,
+		PhotoURL:    r.PhotoURL,
 	}
 }
 

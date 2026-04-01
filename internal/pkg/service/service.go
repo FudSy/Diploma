@@ -21,6 +21,7 @@ type Resource interface {
 	GetById(id uuid.UUID) (dto.ResourceResponse, error)
 	Delete(id uuid.UUID) error
 	Update(id uuid.UUID, input dto.UpdateResourceRequest) error
+	UpdatePhoto(id uuid.UUID, photoURL string) error
 	IncreaseCapacity(id uuid.UUID, delta int) error
 	DecreaseCapacity(id uuid.UUID, delta int) error
 }
@@ -33,10 +34,19 @@ type Booking interface {
 	Delete(userID, bookingID uuid.UUID) error
 }
 
+type ResourceType interface {
+	Create(name string, options []dto.ResourceTypeOptionRequest) (uuid.UUID, error)
+	GetAll() ([]dto.ResourceTypeResponse, error)
+	Delete(id uuid.UUID) error
+	AddOption(resourceTypeID uuid.UUID, option dto.ResourceTypeOptionRequest) (uuid.UUID, error)
+	DeleteOption(optionID uuid.UUID) error
+}
+
 type Service struct {
 	Authorization
 	Resource
 	Booking
+	ResourceType
 }
 
 func NewService(repos *repository.Repository) *Service {
@@ -44,5 +54,6 @@ func NewService(repos *repository.Repository) *Service {
 		Authorization: NewAuthService(repos.Authorization),
 		Resource:      NewResourceService(repos.Resource),
 		Booking:       NewBookingService(repos.Booking, repos.Resource),
+		ResourceType:  NewResourceTypeService(repos.ResourceType),
 	}
 }

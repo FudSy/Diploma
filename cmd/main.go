@@ -52,7 +52,14 @@ func main() {
 		&models.User{},
 		&models.Resource{},
 		&models.Booking{},
+		&models.ResourceType{},
+		&models.ResourceTypeOption{},
 	)
+
+	defaultTypes := []string{"MEETING_ROOM", "CAR", "DEVICE"}
+	for _, name := range defaultTypes {
+		db.Where(models.ResourceType{Name: name}).FirstOrCreate(&models.ResourceType{Name: name})
+	}
 
 	repos := repository.NewRepository(db)
 	services := service.NewService(repos)

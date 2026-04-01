@@ -23,7 +23,7 @@ func (h *Handler) userIdentity(c *gin.Context) {
 
 	user, err := h.services.Authorization.GetUserById(userID)
 	if err != nil {
-		newErrorResponse(c, http.StatusUnauthorized, "user not found")
+		newErrorResponse(c, http.StatusUnauthorized, "пользователь не найден")
 		return
 	}
 
@@ -37,7 +37,7 @@ func extractAccessToken(c *gin.Context) (string, error) {
 	if authHeader != "" {
 		headerParts := strings.SplitN(authHeader, " ", 2)
 		if len(headerParts) != 2 || headerParts[0] != "Bearer" {
-			return "", errors.New("invalid authorization header")
+			return "", errors.New("некорректный заголовок авторизации")
 		}
 		return headerParts[1], nil
 	}
@@ -47,23 +47,23 @@ func extractAccessToken(c *gin.Context) (string, error) {
 		return token, nil
 	}
 
-	return "", errors.New("authorization token not found")
+	return "", errors.New("токен авторизации не найден")
 }
 
 func (h *Handler) adminIdentity(c *gin.Context) {
 	role, ok := c.Get(roleCtx)
 	if !ok {
-		newErrorResponse(c, http.StatusForbidden, "role not found in context")
+		newErrorResponse(c, http.StatusForbidden, "роль не найдена в контексте")
 		return
 	}
 
 	userRole, ok := role.(string)
 	if !ok {
-		newErrorResponse(c, http.StatusForbidden, "role has invalid type")
+		newErrorResponse(c, http.StatusForbidden, "некорректный тип роли")
 		return
 	}
 	if userRole != "ADMIN" {
-		newErrorResponse(c, http.StatusForbidden, "admin access required")
+		newErrorResponse(c, http.StatusForbidden, "требуются права администратора")
 		return
 	}
 

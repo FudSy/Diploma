@@ -29,7 +29,7 @@ func (h *Handler) register(c *gin.Context) {
 	var input dto.RegisterRequest
 
 	if err := c.BindJSON(&input); err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid input body")
+		newErrorResponse(c, http.StatusBadRequest, "некорректное тело запроса")
 		return
 	}
 
@@ -60,7 +60,7 @@ func (h *Handler) registerAdmin(c *gin.Context) {
 	var input dto.RegisterRequest
 
 	if err := c.BindJSON(&input); err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid input body")
+		newErrorResponse(c, http.StatusBadRequest, "некорректное тело запроса")
 		return
 	}
 
@@ -122,7 +122,7 @@ func (h *Handler) me(c *gin.Context) {
 
 	user, err := h.services.Authorization.GetUserById(userID)
 	if err != nil {
-		newErrorResponse(c, http.StatusUnauthorized, "user not found")
+		newErrorResponse(c, http.StatusUnauthorized, "пользователь не найден")
 		return
 	}
 

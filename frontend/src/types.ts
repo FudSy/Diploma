@@ -21,13 +21,28 @@ export interface RegisterRequest {
   surname: string;
 }
 
+export interface ResourceTypeOption {
+  id: string;
+  name: string;
+  option_type: "text" | "number" | "boolean";
+  is_required: boolean;
+}
+
+export interface ResourceType {
+  id: string;
+  name: string;
+  options: ResourceTypeOption[];
+}
+
 export interface Resource {
   id: string;
   name: string;
   description?: string;
-  type: "MEETING_ROOM" | "CAR" | "DEVICE";
+  type: string;
   capacity: number;
   is_active: boolean;
+  location?: string;
+  photo_url?: string;
 }
 
 export interface Booking {

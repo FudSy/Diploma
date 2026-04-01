@@ -47,7 +47,7 @@ func (s *AuthService) CreateAdmin(input dto.RegisterRequest) (uuid.UUID, error) 
 func (s *AuthService) createWithRole(input dto.RegisterRequest, role string) (uuid.UUID, error) {
 	_, err := s.repo.GetUserByLogin(input.Login)
 	if err == nil {
-		return uuid.Nil, errors.New("user with this login already exists")
+		return uuid.Nil, errors.New("пользователь с таким логином уже существует")
 	}
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
@@ -71,11 +71,11 @@ func (s *AuthService) createWithRole(input dto.RegisterRequest, role string) (uu
 func (s *AuthService) Login(login, password string) (string, error) {
 	user, err := s.repo.GetUserByLogin(login)
 	if err != nil {
-		return "", errors.New("user not found")
+		return "", errors.New("пользователь не найден")
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)); err != nil {
-		return "", errors.New("invalid credentials")
+		return "", errors.New("неверный логин или пароль")
 	}
 
 	return s.generateToken(user.ID)
@@ -84,31 +84,31 @@ func (s *AuthService) Login(login, password string) (string, error) {
 func (s *AuthService) ParseToken(accessToken string) (uuid.UUID, error) {
 	rawToken, err := base64.RawURLEncoding.DecodeString(accessToken)
 	if err != nil {
-		return uuid.Nil, errors.New("invalid token format")
+		return uuid.Nil, errors.New("некорректный формат токена")
 	}
 
 	parts := strings.Split(string(rawToken), "|")
 	if len(parts) != 3 {
-		return uuid.Nil, errors.New("invalid token payload")
+		return uuid.Nil, errors.New("некорректная структура токена")
 	}
 
 	payload := strings.Join(parts[:2], "|")
 	signature := s.sign(payload)
 	if !hmac.Equal([]byte(signature), []byte(parts[2])) {
-		return uuid.Nil, errors.New("invalid token signature")
+		return uuid.Nil, errors.New("некорректная подпись токена")
 	}
 
 	expiresAtUnix, err := strconv.ParseInt(parts[1], 10, 64)
 	if err != nil {
-		return uuid.Nil, errors.New("invalid token expiration")
+		return uuid.Nil, errors.New("некорректное время жизни токена")
 	}
 	if time.Now().Unix() > expiresAtUnix {
-		return uuid.Nil, errors.New("token expired")
+		return uuid.Nil, errors.New("срок действия токена истёк")
 	}
 
 	userID, err := uuid.Parse(parts[0])
 	if err != nil {
-		return uuid.Nil, errors.New("invalid user id in token")
+		return uuid.Nil, errors.New("некорректный идентификатор пользователя в токене")
 	}
 
 	return userID, nil

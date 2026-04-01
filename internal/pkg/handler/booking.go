@@ -31,7 +31,7 @@ func (h *Handler) createBooking(c *gin.Context) {
 
 	var input dto.CreateBookingRequest
 	if err := c.BindJSON(&input); err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid input body")
+		newErrorResponse(c, http.StatusBadRequest, "некорректное тело запроса")
 		return
 	}
 
@@ -96,14 +96,14 @@ func (h *Handler) getBookingByID(c *gin.Context) {
 
 	bookingID, err := uuid.Parse(c.Param("id"))
 	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid booking id")
+		newErrorResponse(c, http.StatusBadRequest, "некорректный идентификатор бронирования")
 		return
 	}
 
 	booking, err := h.services.Booking.GetById(bookingID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			newErrorResponse(c, http.StatusNotFound, "booking not found")
+			newErrorResponse(c, http.StatusNotFound, "бронирование не найдено")
 			return
 		}
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
@@ -111,7 +111,7 @@ func (h *Handler) getBookingByID(c *gin.Context) {
 	}
 
 	if isAdmin != "ADMIN" && booking.UserID != userID {
-		newErrorResponse(c, http.StatusForbidden, "forbidden")
+		newErrorResponse(c, http.StatusForbidden, "доступ запрещён")
 		return
 	}
 
@@ -146,27 +146,27 @@ func (h *Handler) updateBooking(c *gin.Context) {
 
 	bookingID, err := uuid.Parse(c.Param("id"))
 	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid booking id")
+		newErrorResponse(c, http.StatusBadRequest, "некорректный идентификатор бронирования")
 		return
 	}
 
 	booking, err := h.services.Booking.GetById(bookingID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			newErrorResponse(c, http.StatusNotFound, "booking not found")
+			newErrorResponse(c, http.StatusNotFound, "бронирование не найдено")
 			return
 		}
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	if isAdmin != "ADMIN" && booking.UserID != userID {
-		newErrorResponse(c, http.StatusForbidden, "forbidden")
+		newErrorResponse(c, http.StatusForbidden, "доступ запрещён")
 		return
 	}
 
 	var input dto.UpdateBookingRequest
 	if err := c.BindJSON(&input); err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid input body")
+		newErrorResponse(c, http.StatusBadRequest, "некорректное тело запроса")
 		return
 	}
 
@@ -204,21 +204,21 @@ func (h *Handler) deleteBooking(c *gin.Context) {
 
 	bookingID, err := uuid.Parse(c.Param("id"))
 	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid booking id")
+		newErrorResponse(c, http.StatusBadRequest, "некорректный идентификатор бронирования")
 		return
 	}
 
 	booking, err := h.services.Booking.GetById(bookingID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			newErrorResponse(c, http.StatusNotFound, "booking not found")
+			newErrorResponse(c, http.StatusNotFound, "бронирование не найдено")
 			return
 		}
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	if isAdmin != "ADMIN" && booking.UserID != userID {
-		newErrorResponse(c, http.StatusForbidden, "forbidden")
+		newErrorResponse(c, http.StatusForbidden, "доступ запрещён")
 		return
 	}
 

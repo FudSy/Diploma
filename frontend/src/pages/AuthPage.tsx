@@ -54,7 +54,8 @@ export function AuthPage({ onToken }: AuthPageProps) {
   return (
     <div className="auth-wrap">
       <div className="auth-card">
-        <h2>{mode === "login" ? "Вход" : "Регистрация"}</h2>
+        <h2>{mode === "login" ? "Добро пожаловать" : "Создать аккаунт"}</h2>
+        <p className="auth-subtitle">Система бронирования ресурсов</p>
         <div className="segmented">
           <button className={mode === "login" ? "active" : ""} onClick={() => setMode("login")}>Вход</button>
           <button className={mode === "register" ? "active" : ""} onClick={() => setMode("register")}>Регистрация</button>
