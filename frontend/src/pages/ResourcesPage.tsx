@@ -69,6 +69,7 @@ function resolvePhotoUrl(photoUrl: string): string {
 export function ResourcesPage({ token, isAdmin }: Props) {
   const [resources, setResources] = useState<Resource[]>([]);
   const [resourceTypes, setResourceTypes] = useState<ResourceType[]>([]);
+  const [typeFilter, setTypeFilter] = useState<string>("");
   const [form, setForm] = useState(initialForm);
   const [newTypeName, setNewTypeName] = useState("");
   const [newTypeOptions, setNewTypeOptions] = useState<NewOption[]>([]);
@@ -206,18 +207,40 @@ export function ResourcesPage({ token, isAdmin }: Props) {
     }
   }
 
+  const filteredResources = typeFilter
+    ? resources.filter((r) => r.type === typeFilter)
+    : resources;
+
   return (
     <section className="page">
       <div className="page-header">
         <h2>Ресурсы</h2>
-        <span className="badge badge-count">{resources.length}</span>
+        <span className="badge badge-count">{filteredResources.length}</span>
       </div>
 
       {error && <p className="error">{error}</p>}
       {uploadError && <p className="error">{uploadError}</p>}
 
+      <div className="filter-bar">
+        <button
+          className={`filter-chip ${typeFilter === "" ? "filter-chip--active" : ""}`}
+          onClick={() => setTypeFilter("")}
+        >
+          Все
+        </button>
+        {resourceTypes.map((rt) => (
+          <button
+            key={rt.id}
+            className={`filter-chip ${typeFilter === rt.name ? "filter-chip--active" : ""}`}
+            onClick={() => setTypeFilter(rt.name)}
+          >
+            {typeIcon(rt.name)} {typeLabel(rt.name)}
+          </button>
+        ))}
+      </div>
+
       <div className="cards-grid">
-        {resources.map((r) => (
+        {filteredResources.map((r) => (
           <article key={r.id} className={`card ${!r.is_active ? "card--inactive" : ""}`}>
             {r.photo_url && (
               <div className="card-photo">

@@ -20,6 +20,9 @@ export function Layout({ user, onLogout }: LayoutProps) {
         <nav>
           <Link to="/resources" className={pathname.startsWith("/resources") ? "active" : ""}>Ресурсы</Link>
           <Link to="/bookings" className={pathname.startsWith("/bookings") ? "active" : ""}>Бронирования</Link>
+          {user.role === "ADMIN" && (
+            <Link to="/stats" className={pathname.startsWith("/stats") ? "active" : ""}>Аналитика</Link>
+          )}
           <button onClick={onLogout}>Выйти</button>
         </nav>
       </header>

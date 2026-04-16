@@ -5,6 +5,7 @@ import { Layout } from "./components/Layout";
 import { AuthPage } from "./pages/AuthPage";
 import { ResourcesPage } from "./pages/ResourcesPage";
 import { BookingsPage } from "./pages/BookingsPage";
+import { StatsPage } from "./pages/StatsPage";
 import type { MeResponse } from "./types";
 
 const TOKEN_KEY = "diploma_token";
@@ -68,6 +69,9 @@ export default function App() {
       <Route element={<Layout user={user} onLogout={handleLogout} />}>
         <Route path="/resources" element={<ResourcesPage token={token} isAdmin={user.role === "ADMIN"} />} />
         <Route path="/bookings" element={<BookingsPage token={token} />} />
+        {user.role === "ADMIN" && (
+          <Route path="/stats" element={<StatsPage token={token} />} />
+        )}
         <Route path="*" element={<Navigate to="/resources" replace />} />
       </Route>
     </Routes>

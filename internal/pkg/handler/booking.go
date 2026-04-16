@@ -10,6 +10,26 @@ import (
 	"gorm.io/gorm"
 )
 
+// getAllBookingsAdmin godoc
+// @Summary List all bookings (admin)
+// @Description Returns all bookings with user and resource details. Requires ADMIN role.
+// @Tags bookings
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {array} dto.AdminBookingResponse
+// @Failure 401 {object} ErrorResponse
+// @Failure 403 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /bookings/all [get]
+func (h *Handler) getAllBookingsAdmin(c *gin.Context) {
+	bookings, err := h.services.Booking.GetAllAdmin()
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, bookings)
+}
+
 // createBooking godoc
 // @Summary Create booking
 // @Description Creates a booking for current user.

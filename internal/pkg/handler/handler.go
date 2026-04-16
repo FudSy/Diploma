@@ -42,6 +42,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	{
 		resources.GET("/", h.getAllResources)
 		resources.GET("/:id", h.getResourceByID)
+		resources.GET("/:id/availability", h.getResourceAvailability)
 	}
 
 	resourceAdmin := router.Group("/resources", h.userIdentity, h.adminIdentity)
@@ -61,6 +62,12 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		bookings.GET("/:id", h.getBookingByID)
 		bookings.PUT("/:id", h.updateBooking)
 		bookings.DELETE("/:id", h.deleteBooking)
+	}
+
+	adminAPI := router.Group("/admin", h.userIdentity, h.adminIdentity)
+	{
+		adminAPI.GET("/bookings", h.getAllBookingsAdmin)
+		adminAPI.GET("/stats", h.getStatsOverview)
 	}
 
 	resourceTypes := router.Group("/resource-types", h.userIdentity)

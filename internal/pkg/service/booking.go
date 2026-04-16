@@ -48,3 +48,11 @@ func (s *BookingService) Update(userID uuid.UUID, bookingID uuid.UUID, input dto
 func (s *BookingService) Delete(userID uuid.UUID, bookingID uuid.UUID) error {
 	return s.bookingRepo.Delete(bookingID)
 }
+
+func (s *BookingService) GetAllAdmin() ([]dto.AdminBookingResponse, error) {
+	return s.bookingRepo.GetAll()
+}
+
+func (s *BookingService) GetBusySlots(resourceID uuid.UUID, date string) ([]dto.BusySlot, error) {
+	return s.bookingRepo.GetBusySlots(resourceID, date)
+}

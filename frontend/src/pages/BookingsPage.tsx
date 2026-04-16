@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useState } from "react";
-import { createBooking, deleteBooking, getBookings, getResources, updateBooking } from "../api";
-import type { Booking, Resource } from "../types";
+import { createBooking, deleteBooking, getBookings, getResourceAvailability, getResources, updateBooking } from "../api";
+import type { Booking, BusySlot, Resource } from "../types";
 
 interface Props {
   token: string;
@@ -77,6 +77,8 @@ export function BookingsPage({ token }: Props) {
   const [resources, setResources] = useState<Resource[]>([]);
   const [form, setForm] = useState<BookingForm>(initialForm);
   const [error, setError] = useState<string | null>(null);
+  const [busySlots, setBusySlots] = useState<BusySlot[]>([]);
+  const [slotsDate, setSlotsDate] = useState<string>(() => new Date().toISOString().slice(0, 10));
 
   const selectedResource = resources.find((r) => r.id === form.resource_id);
 
@@ -97,6 +99,13 @@ export function BookingsPage({ token }: Props) {
   useEffect(() => {
     void loadAll();
   }, []);
+
+  useEffect(() => {
+    if (!form.resource_id) return;
+    getResourceAvailability(token, form.resource_id, slotsDate)
+      .then((res) => setBusySlots(res.busy_slots))
+      .catch(() => setBusySlots([]));
+  }, [form.resource_id, slotsDate, token]);
 
   async function handleCreate(e: FormEvent) {
     e.preventDefault();
@@ -184,6 +193,31 @@ export function BookingsPage({ token }: Props) {
               </div>
             </div>
           )}
+
+          <div className="availability-section">
+            <div className="availability-header">
+              <span className="availability-title">Занятость на дату</span>
+              <input
+                type="date"
+                value={slotsDate}
+                onChange={(e) => setSlotsDate(e.target.value)}
+                className="date-input-sm"
+              />
+            </div>
+            {busySlots.length === 0 ? (
+              <p className="availability-free">Свободно весь день</p>
+            ) : (
+              <ul className="busy-slots-list">
+                {busySlots.map((s) => (
+                  <li key={s.booking_id} className="busy-slot">
+                    🔴 {new Date(s.start_time).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}
+                    {" — "}
+                    {new Date(s.end_time).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
 
           <label>
             Начало

@@ -8,6 +8,10 @@ import (
 	"time"
 )
 
+type Stats interface {
+	GetOverview() (dto.StatsOverview, error)
+}
+
 type Authorization interface {
 	CreateUser(user dto.User) (uuid.UUID, error)
 	GetUserByLogin(login string) (dto.User, error)
@@ -28,8 +32,10 @@ type Resource interface {
 type Booking interface {
 	Create(userID uuid.UUID, input dto.CreateBookingRequest) (uuid.UUID, error)
 	GetAllByUser(userID uuid.UUID) ([]dto.BookingResponse, error)
+	GetAll() ([]dto.AdminBookingResponse, error)
 	GetById(id uuid.UUID) (dto.BookingResponse, error)
 	HasTimeOverlap(resourceID uuid.UUID, startTime, endTime time.Time) (bool, error)
+	GetBusySlots(resourceID uuid.UUID, date string) ([]dto.BusySlot, error)
 	Update(id uuid.UUID, input dto.UpdateBookingRequest) error
 	Delete(id uuid.UUID) error
 }
@@ -47,6 +53,7 @@ type Repository struct {
 	Resource
 	Booking
 	ResourceType
+	Stats
 }
 
 func NewRepository(db *gorm.DB) *Repository {
@@ -55,5 +62,6 @@ func NewRepository(db *gorm.DB) *Repository {
 		Resource:      NewResourcePostgres(db),
 		Booking:       NewBookingPostgres(db),
 		ResourceType:  NewResourceTypePostgres(db),
+		Stats:         NewStatsPostgres(db),
 	}
 }

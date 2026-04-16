@@ -1,5 +1,5 @@
 import { apiRequest, apiUpload } from "./client";
-import type { Booking, LoginRequest, MeResponse, RegisterRequest, Resource, ResourceType } from "../types";
+import type { AdminBooking, Booking, BusySlot, LoginRequest, MeResponse, RegisterRequest, Resource, ResourceType, StatsOverview } from "../types";
 
 interface TokenResponse {
   token: string;
@@ -100,4 +100,16 @@ export function deleteResourceTypeOption(
   optionId: string
 ): Promise<{ status: string }> {
   return apiRequest<{ status: string }>(`/resource-types/${resourceTypeId}/options/${optionId}`, { method: "DELETE", token });
+}
+
+export function getStats(token: string): Promise<StatsOverview> {
+  return apiRequest<StatsOverview>("/admin/stats", { token });
+}
+
+export function getAdminBookings(token: string): Promise<AdminBooking[]> {
+  return apiRequest<AdminBooking[]>("/admin/bookings", { token });
+}
+
+export function getResourceAvailability(token: string, resourceId: string, date: string): Promise<{ date: string; busy_slots: BusySlot[] }> {
+  return apiRequest<{ date: string; busy_slots: BusySlot[] }>(`/resources/${resourceId}/availability?date=${date}`, { token });
 }

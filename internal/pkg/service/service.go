@@ -29,9 +29,15 @@ type Resource interface {
 type Booking interface {
 	Create(userID uuid.UUID, input dto.CreateBookingRequest) (uuid.UUID, error)
 	GetAll(userID uuid.UUID) ([]dto.BookingResponse, error)
+	GetAllAdmin() ([]dto.AdminBookingResponse, error)
 	GetById(bookingID uuid.UUID) (dto.BookingResponse, error)
+	GetBusySlots(resourceID uuid.UUID, date string) ([]dto.BusySlot, error)
 	Update(userID, bookingID uuid.UUID, input dto.UpdateBookingRequest) error
 	Delete(userID, bookingID uuid.UUID) error
+}
+
+type Analytics interface {
+	GetOverview() (dto.StatsOverview, error)
 }
 
 type ResourceType interface {
@@ -47,6 +53,7 @@ type Service struct {
 	Resource
 	Booking
 	ResourceType
+	Analytics
 }
 
 func NewService(repos *repository.Repository) *Service {
@@ -55,5 +62,6 @@ func NewService(repos *repository.Repository) *Service {
 		Resource:      NewResourceService(repos.Resource),
 		Booking:       NewBookingService(repos.Booking, repos.Resource),
 		ResourceType:  NewResourceTypeService(repos.ResourceType),
+		Analytics:     NewStatsService(repos.Stats),
 	}
 }

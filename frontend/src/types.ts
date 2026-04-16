@@ -53,3 +53,56 @@ export interface Booking {
   end_time: string;
   status: string;
 }
+
+export interface AdminBooking {
+  id: string;
+  user_id: string;
+  user_name: string;
+  resource_id: string;
+  resource_name: string;
+  resource_type: string;
+  start_time: string;
+  end_time: string;
+  status: string;
+}
+
+export interface BusySlot {
+  booking_id: string;
+  start_time: string;
+  end_time: string;
+  status: string;
+}
+
+export interface TypeStat {
+  type: string;
+  count: number;
+}
+
+export interface ResourceStat {
+  resource_id: string;
+  resource_name: string;
+  type: string;
+  count: number;
+}
+
+export interface DayStat {
+  date: string;
+  count: number;
+}
+
+export interface HourStat {
+  hour: number;
+  count: number;
+}
+
+export interface StatsOverview {
+  total_bookings: number;
+  active_bookings: number;
+  cancelled_bookings: number;
+  total_resources: number;
+  active_resources: number;
+  bookings_by_type: TypeStat[];
+  top_resources: ResourceStat[];
+  bookings_last_30_days: DayStat[];
+  peak_hours: HourStat[];
+}

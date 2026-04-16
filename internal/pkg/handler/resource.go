@@ -65,6 +65,16 @@ func (h *Handler) getAllResources(c *gin.Context) {
 		return
 	}
 
+	if typeFilter := c.Query("type"); typeFilter != "" {
+		filtered := resources[:0]
+		for _, r := range resources {
+			if strings.EqualFold(r.Type, typeFilter) {
+				filtered = append(filtered, r)
+			}
+		}
+		resources = filtered
+	}
+
 	c.JSON(http.StatusOK, resources)
 }
 

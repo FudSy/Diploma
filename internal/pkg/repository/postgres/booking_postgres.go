@@ -88,3 +88,54 @@ func (r *BookingPostgres) Update(id uuid.UUID, input dto.UpdateBookingRequest) e
 func (r *BookingPostgres) Delete(id uuid.UUID) error {
 	return r.db.Delete(&models.Booking{}, "id = ?", id).Error
 }
+
+func (r *BookingPostgres) GetAll() ([]dto.AdminBookingResponse, error) {
+	rows, err := r.db.Raw(`
+		SELECT b.id, b.user_id,
+		       u.name || ' ' || u.surname AS user_name,
+		       b.resource_id,
+		       res.name AS resource_name,
+		       res.type AS resource_type,
+		       b.start_time, b.end_time, b.status
+		FROM bookings b
+		JOIN users u   ON b.user_id = u.id
+		JOIN resources res ON b.resource_id = res.id
+		ORDER BY b.start_time DESC
+	`).Rows()
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var result []dto.AdminBookingResponse
+	for rows.Next() {
+		var row dto.AdminBookingResponse
+		if err := r.db.ScanRows(rows, &row); err != nil {
+			return nil, err
+		}
+		result = append(result, row)
+	}
+	if result == nil {
+		result = []dto.AdminBookingResponse{}
+	}
+	return result, nil
+}
+
+func (r *BookingPostgres) GetBusySlots(resourceID uuid.UUID, date string) ([]dto.BusySlot, error) {
+	var slots []dto.BusySlot
+	err := r.db.Raw(`
+		SELECT id AS booking_id, start_time, end_time, status
+		FROM bookings
+		WHERE resource_id = ?
+		  AND status <> 'CANCELLED'
+		  AND DATE(start_time) = ?
+		ORDER BY start_time
+	`, resourceID, date).Scan(&slots).Error
+	if err != nil {
+		return nil, err
+	}
+	if slots == nil {
+		slots = []dto.BusySlot{}
+	}
+	return slots, nil
+}

@@ -12,8 +12,10 @@ import (
 type bookingRepoMock struct {
 	createFn         func(userID uuid.UUID, input dto.CreateBookingRequest) (uuid.UUID, error)
 	getAllByUserFn   func(userID uuid.UUID) ([]dto.BookingResponse, error)
+	getAllFn         func() ([]dto.AdminBookingResponse, error)
 	getByIDFn        func(id uuid.UUID) (dto.BookingResponse, error)
 	hasTimeOverlapFn func(resourceID uuid.UUID, startTime, endTime time.Time) (bool, error)
+	getBusySlotsFn   func(resourceID uuid.UUID, date string) ([]dto.BusySlot, error)
 	updateFn         func(id uuid.UUID, input dto.UpdateBookingRequest) error
 	deleteFn         func(id uuid.UUID) error
 }
@@ -40,6 +42,20 @@ func (m *bookingRepoMock) Update(id uuid.UUID, input dto.UpdateBookingRequest) e
 
 func (m *bookingRepoMock) Delete(id uuid.UUID) error {
 	return m.deleteFn(id)
+}
+
+func (m *bookingRepoMock) GetAll() ([]dto.AdminBookingResponse, error) {
+	if m.getAllFn != nil {
+		return m.getAllFn()
+	}
+	return []dto.AdminBookingResponse{}, nil
+}
+
+func (m *bookingRepoMock) GetBusySlots(resourceID uuid.UUID, date string) ([]dto.BusySlot, error) {
+	if m.getBusySlotsFn != nil {
+		return m.getBusySlotsFn(resourceID, date)
+	}
+	return []dto.BusySlot{}, nil
 }
 
 func TestBookingService_Create_StartTimeMustBeFuture(t *testing.T) {
