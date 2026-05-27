@@ -1044,3 +1044,290 @@ input[type="checkbox"] { width: auto; accent-color: var(--accent); }
     min-height: 80px;
   }
 }
+
+/* ── Toasts ── */
+.toast-stack {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  display: grid;
+  gap: 0.5rem;
+  z-index: 9999;
+  pointer-events: none;
+  max-width: min(380px, calc(100vw - 2rem));
+}
+
+.toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  border-left: 4px solid var(--accent);
+  cursor: pointer;
+  animation: toast-in 0.25s ease-out;
+  transition: transform 0.15s, opacity 0.15s;
+}
+
+.toast:hover {
+  transform: translateX(-2px);
+  opacity: 0.95;
+}
+
+.toast--success { border-left-color: var(--success); }
+.toast--error { border-left-color: var(--danger); }
+.toast--info { border-left-color: var(--accent); }
+
+.toast-icon {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: #fff;
+  background: var(--accent);
+}
+
+.toast--success .toast-icon { background: var(--success); }
+.toast--error .toast-icon { background: var(--danger); }
+.toast--info .toast-icon { background: var(--accent); }
+
+.toast-message {
+  flex: 1;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--text);
+}
+
+@keyframes toast-in {
+  from { transform: translateX(20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* ── Modal ── */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.45);
+  display: grid;
+  place-items: center;
+  z-index: 10000;
+  animation: backdrop-in 0.15s ease-out;
+}
+
+.modal-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  max-width: 420px;
+  width: calc(100vw - 2rem);
+  box-shadow: var(--shadow-lg);
+  animation: modal-in 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}
+
+@keyframes backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modal-in {
+  from { transform: scale(0.92) translateY(8px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+/* ── Skeleton ── */
+.skeleton {
+  display: block;
+  background: linear-gradient(90deg, var(--surface-3) 0%, var(--border) 50%, var(--surface-3) 100%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s infinite;
+}
+
+.skeleton-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.skeleton-list-row {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Animations: list & card fade-in ── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.card, .booking-card, .panel, .kpi-card {
+  animation: fade-up 0.25s ease-out both;
+}
+
+.card:hover, .booking-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+/* ── Stat bar animation ── */
+.stat-bar-fill {
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ── Live status badge ── */
+.status-live {
+  background: var(--success-light);
+  color: var(--success);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.status-live::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  background: var(--success);
+  border-radius: 50%;
+  box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.7);
+  animation: live-pulse 1.6s infinite;
+}
+
+@keyframes live-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.6); }
+  70% { box-shadow: 0 0 0 8px rgba(22, 163, 74, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
+}
+
+/* ── Duration chips on booking form ── */
+.duration-chips {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-top: 0.25rem;
+}
+
+.duration-chip {
+  padding: 0.3rem 0.75rem;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-2);
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.duration-chip:hover {
+  background: var(--accent-light);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ── Inline conflict warning ── */
+.inline-warn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  background: var(--warning-light);
+  border-left: 3px solid #ca8a04;
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
+  color: #713f12;
+}
+
+/* ── Spinner ── */
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Password toggle ── */
+.password-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0.4rem;
+}
+
+.password-row input {
+  flex: 1;
+}
+
+.password-toggle {
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  padding: 0 0.75rem;
+  cursor: pointer;
+  font-size: 1.05rem;
+  transition: background 0.15s;
+}
+
+.password-toggle:hover { background: var(--border); }
+
+/* ── Empty state generic ── */
+.empty-state-compact {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+}
+
+.calendar-url-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+.calendar-url {
+  flex: 1 1 320px;
+  min-width: 0;
+  padding: 0.5rem 0.75rem;
+  background: #f3f4f6;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+  font-size: 0.85rem;
+  word-break: break-all;
+  user-select: all;
+}
+

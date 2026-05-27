@@ -40,16 +40,7 @@ func (r *AuthPostgres) GetUserByLogin(login string) (dto.User, error) {
 		return dto.User{}, err
 	}
 
-	return dto.User{
-		ID:           modelUser.ID,
-		Login:        modelUser.Login,
-		Email:        modelUser.Email,
-		Name:         modelUser.Name,
-		Surname:      modelUser.Surname,
-		PasswordHash: modelUser.PasswordHash,
-		FullName:     modelUser.FullName,
-		Role:         modelUser.Role,
-	}, nil
+	return toDTOUser(modelUser), nil
 }
 
 func (r *AuthPostgres) GetUserById(id uuid.UUID) (dto.User, error) {
@@ -59,14 +50,33 @@ func (r *AuthPostgres) GetUserById(id uuid.UUID) (dto.User, error) {
 		return dto.User{}, err
 	}
 
+	return toDTOUser(modelUser), nil
+}
+
+func (r *AuthPostgres) GetUserByCalendarToken(token string) (dto.User, error) {
+	var modelUser models.User
+	if err := r.db.Where("calendar_token = ?", token).First(&modelUser).Error; err != nil {
+		return dto.User{}, err
+	}
+	return toDTOUser(modelUser), nil
+}
+
+func (r *AuthPostgres) SetCalendarToken(userID uuid.UUID, token string) error {
+	return r.db.Model(&models.User{}).
+		Where("id = ?", userID).
+		Update("calendar_token", token).Error
+}
+
+func toDTOUser(m models.User) dto.User {
 	return dto.User{
-		ID:           modelUser.ID,
-		Login:        modelUser.Login,
-		Email:        modelUser.Email,
-		Name:         modelUser.Name,
-		Surname:      modelUser.Surname,
-		PasswordHash: modelUser.PasswordHash,
-		FullName:     modelUser.FullName,
-		Role:         modelUser.Role,
-	}, nil
+		ID:            m.ID,
+		Login:         m.Login,
+		Email:         m.Email,
+		Name:          m.Name,
+		Surname:       m.Surname,
+		PasswordHash:  m.PasswordHash,
+		FullName:      m.FullName,
+		Role:          m.Role,
+		CalendarToken: m.CalendarToken,
+	}
 }

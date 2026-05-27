@@ -34,12 +34,13 @@ type MeResponse struct {
 }
 
 type User struct {
-	ID           uuid.UUID
-	Login        string
-	Email        string
-	Name         string
-	Surname      string
-	PasswordHash string
-	FullName     string
-	Role         string
+	ID            uuid.UUID
+	Login         string
+	Email         string
+	Name          string
+	Surname       string
+	PasswordHash  string
+	FullName      string
+	Role          string
+	CalendarToken string
 }

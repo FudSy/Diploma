@@ -56,6 +56,18 @@ func main() {
 		&models.ResourceTypeOption{},
 	)
 
+	// Replace AutoMigrate-created unique index on calendar_token with a partial
+	// unique index that ignores empty strings (so multiple users may have no token yet).
+	db.Exec(`DROP INDEX IF EXISTS idx_users_calendar_token`)
+	db.Exec(`CREATE UNIQUE INDEX IF NOT EXISTS uniq_users_calendar_token ON users (calendar_token) WHERE calendar_token <> ''`)
+
+	// Ensure FK constraints on bookings cascade on delete (so deleting a resource
+	// or user wipes its bookings). AutoMigrate doesn't change existing FK rules.
+	db.Exec(`ALTER TABLE bookings DROP CONSTRAINT IF EXISTS fk_resources_bookings`)
+	db.Exec(`ALTER TABLE bookings ADD CONSTRAINT fk_resources_bookings FOREIGN KEY (resource_id) REFERENCES resources(id) ON UPDATE CASCADE ON DELETE CASCADE`)
+	db.Exec(`ALTER TABLE bookings DROP CONSTRAINT IF EXISTS fk_users_bookings`)
+	db.Exec(`ALTER TABLE bookings ADD CONSTRAINT fk_users_bookings FOREIGN KEY (user_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE`)
+
 	defaultTypes := []string{"MEETING_ROOM", "CAR", "DEVICE"}
 	for _, name := range defaultTypes {
 		db.Where(models.ResourceType{Name: name}).FirstOrCreate(&models.ResourceType{Name: name})

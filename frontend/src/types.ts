@@ -95,6 +95,16 @@ export interface HourStat {
   count: number;
 }
 
+export interface CalendarFeedResponse {
+  token: string;
+  feed_url: string;
+  webcal_url: string;
+}
+
+export interface GoogleLinkResponse {
+  url: string;
+}
+
 export interface StatsOverview {
   total_bookings: number;
   active_bookings: number;

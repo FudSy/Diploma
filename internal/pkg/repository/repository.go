@@ -16,6 +16,8 @@ type Authorization interface {
 	CreateUser(user dto.User) (uuid.UUID, error)
 	GetUserByLogin(login string) (dto.User, error)
 	GetUserById(id uuid.UUID) (dto.User, error)
+	GetUserByCalendarToken(token string) (dto.User, error)
+	SetCalendarToken(userID uuid.UUID, token string) error
 }
 
 type Resource interface {
@@ -34,8 +36,10 @@ type Booking interface {
 	GetAllByUser(userID uuid.UUID) ([]dto.BookingResponse, error)
 	GetAll() ([]dto.AdminBookingResponse, error)
 	GetById(id uuid.UUID) (dto.BookingResponse, error)
-	HasTimeOverlap(resourceID uuid.UUID, startTime, endTime time.Time) (bool, error)
-	GetBusySlots(resourceID uuid.UUID, date string) ([]dto.BusySlot, error)
+	HasTimeOverlap(userID, resourceID uuid.UUID, startTime, endTime time.Time) (bool, error)
+	GetBusySlots(userID, resourceID uuid.UUID, date string) ([]dto.BusySlot, error)
+	GetCalendarBookingByID(id uuid.UUID) (dto.CalendarBooking, error)
+	GetCalendarBookingsByUser(userID uuid.UUID) ([]dto.CalendarBooking, error)
 	Update(id uuid.UUID, input dto.UpdateBookingRequest) error
 	Delete(id uuid.UUID) error
 }

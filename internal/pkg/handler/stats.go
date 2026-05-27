@@ -29,8 +29,8 @@ func (h *Handler) getStatsOverview(c *gin.Context) {
 }
 
 // getResourceAvailability godoc
-// @Summary Get busy time slots for a resource
-// @Description Returns all booked (non-cancelled) time slots for a resource on a given date.
+// @Summary Get user's busy time slots for a resource
+// @Description Returns the current user's booked (non-cancelled) time slots for a resource on a given date.
 // @Tags resources
 // @Produce json
 // @Security BearerAuth
@@ -42,6 +42,12 @@ func (h *Handler) getStatsOverview(c *gin.Context) {
 // @Failure 500 {object} ErrorResponse
 // @Router /resources/{id}/availability [get]
 func (h *Handler) getResourceAvailability(c *gin.Context) {
+	userID, err := getUserID(c)
+	if err != nil {
+		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		return
+	}
+
 	resourceID, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		newErrorResponse(c, http.StatusBadRequest, "некорректный идентификатор ресурса")
@@ -57,7 +63,7 @@ func (h *Handler) getResourceAvailability(c *gin.Context) {
 		return
 	}
 
-	slots, err := h.services.Booking.GetBusySlots(resourceID, dateStr)
+	slots, err := h.services.Booking.GetBusySlots(userID, resourceID, dateStr)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return

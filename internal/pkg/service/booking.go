@@ -22,12 +22,12 @@ func (s *BookingService) Create(userID uuid.UUID, input dto.CreateBookingRequest
 		return uuid.Nil, errors.New("время начала бронирования должно быть в будущем")
 	}
 
-	hasOverlap, err := s.bookingRepo.HasTimeOverlap(input.ResourceID, input.StartTime, input.EndTime)
+	hasOverlap, err := s.bookingRepo.HasTimeOverlap(userID, input.ResourceID, input.StartTime, input.EndTime)
 	if err != nil {
 		return uuid.Nil, err
 	}
 	if hasOverlap {
-		return uuid.Nil, errors.New("время бронирования пересекается с существующим")
+		return uuid.Nil, errors.New("время бронирования пересекается с вашей другой бронью")
 	}
 
 	return s.bookingRepo.Create(userID, input)
@@ -53,6 +53,6 @@ func (s *BookingService) GetAllAdmin() ([]dto.AdminBookingResponse, error) {
 	return s.bookingRepo.GetAll()
 }
 
-func (s *BookingService) GetBusySlots(resourceID uuid.UUID, date string) ([]dto.BusySlot, error) {
-	return s.bookingRepo.GetBusySlots(resourceID, date)
+func (s *BookingService) GetBusySlots(userID, resourceID uuid.UUID, date string) ([]dto.BusySlot, error) {
+	return s.bookingRepo.GetBusySlots(userID, resourceID, date)
 }

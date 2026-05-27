@@ -62,7 +62,17 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		bookings.GET("/:id", h.getBookingByID)
 		bookings.PUT("/:id", h.updateBooking)
 		bookings.DELETE("/:id", h.deleteBooking)
+		bookings.GET("/:id/ics", h.downloadBookingICS)
+		bookings.GET("/:id/google-link", h.googleCalendarLink)
 	}
+
+	me := router.Group("/me", h.userIdentity)
+	{
+		me.GET("/calendar", h.getMyCalendarFeed)
+		me.POST("/calendar/rotate", h.rotateMyCalendarFeed)
+	}
+
+	router.GET("/calendar/feed/:token", h.publicCalendarFeed)
 
 	adminAPI := router.Group("/admin", h.userIdentity, h.adminIdentity)
 	{

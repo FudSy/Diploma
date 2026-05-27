@@ -11,6 +11,9 @@ import {
   uploadResourcePhoto,
 } from "../api";
 import type { Resource, ResourceType } from "../types";
+import { useToast } from "../components/Toast";
+import { useConfirm } from "../components/ConfirmDialog";
+import { SkeletonGrid } from "../components/Skeleton";
 
 interface Props {
   token: string;
@@ -67,27 +70,27 @@ function resolvePhotoUrl(photoUrl: string): string {
 }
 
 export function ResourcesPage({ token, isAdmin }: Props) {
+  const toast = useToast();
+  const confirm = useConfirm();
   const [resources, setResources] = useState<Resource[]>([]);
   const [resourceTypes, setResourceTypes] = useState<ResourceType[]>([]);
   const [typeFilter, setTypeFilter] = useState<string>("");
   const [form, setForm] = useState(initialForm);
   const [newTypeName, setNewTypeName] = useState("");
   const [newTypeOptions, setNewTypeOptions] = useState<NewOption[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [typeError, setTypeError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const [uploadingId, setUploadingId] = useState<string | null>(null);
-  const [uploadError, setUploadError] = useState<string | null>(null);
   const [expandedTypeId, setExpandedTypeId] = useState<string | null>(null);
   const [addOptionForm, setAddOptionForm] = useState<NewOption>({ ...emptyOption });
-  const [addOptionError, setAddOptionError] = useState<string | null>(null);
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   async function loadResources() {
     try {
-      setError(null);
       setResources(await getResources(token));
     } catch (err) {
-      setError((err as Error).message);
+      toast.error((err as Error).message);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -113,18 +116,28 @@ export function ResourcesPage({ token, isAdmin }: Props) {
     try {
       await createResource(token, form);
       setForm({ ...initialForm, type: resourceTypes[0]?.name ?? "" });
+      toast.success("Ресурс создан");
       await loadResources();
     } catch (err) {
-      setError((err as Error).message);
+      toast.error((err as Error).message);
     }
   }
 
   async function handleDelete(id: string) {
+    const target = resources.find((r) => r.id === id);
+    const ok = await confirm({
+      title: `Удалить «${target?.name ?? "ресурс"}»?`,
+      message: "Все связанные брони (прошлые, активные и будущие) будут удалены вместе с ресурсом. Это действие необратимо.",
+      confirmText: "Удалить ресурс и брони",
+      variant: "danger",
+    });
+    if (!ok) return;
     try {
       await deleteResource(token, id);
+      toast.success("Ресурс удалён");
       await loadResources();
     } catch (err) {
-      setError((err as Error).message);
+      toast.error((err as Error).message);
     }
   }
 
@@ -133,24 +146,31 @@ export function ResourcesPage({ token, isAdmin }: Props) {
     const name = newTypeName.trim().toUpperCase().replace(/\s+/g, "_");
     if (!name) return;
     try {
-      setTypeError(null);
       const options = newTypeOptions.filter((o) => o.name.trim() !== "");
       await createResourceType(token, name, options.length > 0 ? options : undefined);
       setNewTypeName("");
       setNewTypeOptions([]);
+      toast.success("Тип ресурса создан");
       await loadTypes();
     } catch (err) {
-      setTypeError((err as Error).message);
+      toast.error((err as Error).message);
     }
   }
 
   async function handleDeleteType(id: string) {
+    const ok = await confirm({
+      title: "Удалить тип ресурса?",
+      confirmText: "Удалить",
+      variant: "danger",
+    });
+    if (!ok) return;
     try {
       await deleteResourceType(token, id);
       if (expandedTypeId === id) setExpandedTypeId(null);
+      toast.success("Тип удалён");
       await loadTypes();
     } catch (err) {
-      setTypeError((err as Error).message);
+      toast.error((err as Error).message);
     }
   }
 
@@ -172,12 +192,12 @@ export function ResourcesPage({ token, isAdmin }: Props) {
     e.preventDefault();
     if (!addOptionForm.name.trim()) return;
     try {
-      setAddOptionError(null);
       await addResourceTypeOption(token, resourceTypeId, addOptionForm);
       setAddOptionForm({ ...emptyOption });
+      toast.success("Опция добавлена");
       await loadTypes();
     } catch (err) {
-      setAddOptionError((err as Error).message);
+      toast.error((err as Error).message);
     }
   }
 
@@ -186,7 +206,7 @@ export function ResourcesPage({ token, isAdmin }: Props) {
       await deleteResourceTypeOption(token, resourceTypeId, optionId);
       await loadTypes();
     } catch (err) {
-      setTypeError((err as Error).message);
+      toast.error((err as Error).message);
     }
   }
 
@@ -196,12 +216,12 @@ export function ResourcesPage({ token, isAdmin }: Props) {
     const file = input.files[0];
     try {
       setUploadingId(resourceId);
-      setUploadError(null);
       await uploadResourcePhoto(token, resourceId, file);
       input.value = "";
+      toast.success("Фото загружено");
       await loadResources();
     } catch (err) {
-      setUploadError((err as Error).message);
+      toast.error((err as Error).message);
     } finally {
       setUploadingId(null);
     }
@@ -217,9 +237,6 @@ export function ResourcesPage({ token, isAdmin }: Props) {
         <h2>Ресурсы</h2>
         <span className="badge badge-count">{filteredResources.length}</span>
       </div>
-
-      {error && <p className="error">{error}</p>}
-      {uploadError && <p className="error">{uploadError}</p>}
 
       <div className="filter-bar">
         <button
@@ -239,6 +256,15 @@ export function ResourcesPage({ token, isAdmin }: Props) {
         ))}
       </div>
 
+      {loading ? (
+        <SkeletonGrid count={6} />
+      ) : filteredResources.length === 0 ? (
+        <div className="empty-state-compact">
+          {typeFilter
+            ? `Нет ресурсов типа «${typeLabel(typeFilter)}»`
+            : "Ресурсов пока нет. Добавьте первый через форму ниже."}
+        </div>
+      ) : (
       <div className="cards-grid">
         {filteredResources.map((r) => (
           <article key={r.id} className={`card ${!r.is_active ? "card--inactive" : ""}`}>
@@ -287,6 +313,7 @@ export function ResourcesPage({ token, isAdmin }: Props) {
           </article>
         ))}
       </div>
+      )}
 
       {isAdmin && (
         <div className="admin-panels">
@@ -329,7 +356,6 @@ export function ResourcesPage({ token, isAdmin }: Props) {
 
           <div className="panel">
             <h3>Типы ресурсов</h3>
-            {typeError && <p className="error">{typeError}</p>}
             <ul className="type-list">
               {resourceTypes.map((rt) => (
                 <li key={rt.id} className="type-list-item-wrap">
@@ -365,7 +391,6 @@ export function ResourcesPage({ token, isAdmin }: Props) {
                       )}
 
                       <form className="add-option-form" onSubmit={(e) => handleAddOptionToType(e, rt.id)}>
-                        {addOptionError && <p className="error">{addOptionError}</p>}
                         <input
                           placeholder="Название опции"
                           value={addOptionForm.name}

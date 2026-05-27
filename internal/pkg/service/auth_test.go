@@ -28,6 +28,14 @@ func (m *authRepoMock) GetUserById(id uuid.UUID) (dto.User, error) {
 	return m.getUserByIDFn(id)
 }
 
+func (m *authRepoMock) GetUserByCalendarToken(token string) (dto.User, error) {
+	return dto.User{}, errors.New("not implemented")
+}
+
+func (m *authRepoMock) SetCalendarToken(userID uuid.UUID, token string) error {
+	return nil
+}
+
 func TestAuthService_CreateUser_Duplicate(t *testing.T) {
 	repo := &authRepoMock{
 		createUserFn: func(user dto.User) (uuid.UUID, error) { return uuid.Nil, nil },

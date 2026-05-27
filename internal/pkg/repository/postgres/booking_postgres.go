@@ -53,10 +53,11 @@ func (r *BookingPostgres) GetById(id uuid.UUID) (dto.BookingResponse, error) {
 	return dto.BookingToResponse(booking), nil
 }
 
-func (r *BookingPostgres) HasTimeOverlap(resourceID uuid.UUID, startTime, endTime time.Time) (bool, error) {
+func (r *BookingPostgres) HasTimeOverlap(userID, resourceID uuid.UUID, startTime, endTime time.Time) (bool, error) {
 	var count int64
 	err := r.db.Model(&models.Booking{}).
-		Where("resource_id = ? AND status <> ? AND start_time < ? AND end_time > ?", resourceID, "CANCELLED", endTime, startTime).
+		Where("user_id = ? AND resource_id = ? AND status <> ? AND start_time < ? AND end_time > ?",
+			userID, resourceID, "CANCELLED", endTime, startTime).
 		Count(&count).Error
 	if err != nil {
 		return false, err
@@ -121,16 +122,64 @@ func (r *BookingPostgres) GetAll() ([]dto.AdminBookingResponse, error) {
 	return result, nil
 }
 
-func (r *BookingPostgres) GetBusySlots(resourceID uuid.UUID, date string) ([]dto.BusySlot, error) {
+func (r *BookingPostgres) GetCalendarBookingByID(id uuid.UUID) (dto.CalendarBooking, error) {
+	var row dto.CalendarBooking
+	err := r.db.Raw(`
+		SELECT b.id AS booking_id, b.user_id,
+		       b.resource_id,
+		       res.name AS resource_name,
+		       res.type AS resource_type,
+		       COALESCE(res.location, '') AS location,
+		       COALESCE(res.description, '') AS description,
+		       b.start_time, b.end_time, b.status, b.updated_at
+		FROM bookings b
+		JOIN resources res ON b.resource_id = res.id
+		WHERE b.id = ?
+	`, id).Scan(&row).Error
+	if err != nil {
+		return dto.CalendarBooking{}, err
+	}
+	if row.BookingID == uuid.Nil {
+		return dto.CalendarBooking{}, gorm.ErrRecordNotFound
+	}
+	return row, nil
+}
+
+func (r *BookingPostgres) GetCalendarBookingsByUser(userID uuid.UUID) ([]dto.CalendarBooking, error) {
+	var rows []dto.CalendarBooking
+	err := r.db.Raw(`
+		SELECT b.id AS booking_id, b.user_id,
+		       b.resource_id,
+		       res.name AS resource_name,
+		       res.type AS resource_type,
+		       COALESCE(res.location, '') AS location,
+		       COALESCE(res.description, '') AS description,
+		       b.start_time, b.end_time, b.status, b.updated_at
+		FROM bookings b
+		JOIN resources res ON b.resource_id = res.id
+		WHERE b.user_id = ? AND b.status <> 'CANCELLED'
+		ORDER BY b.start_time
+	`, userID).Scan(&rows).Error
+	if err != nil {
+		return nil, err
+	}
+	if rows == nil {
+		rows = []dto.CalendarBooking{}
+	}
+	return rows, nil
+}
+
+func (r *BookingPostgres) GetBusySlots(userID, resourceID uuid.UUID, date string) ([]dto.BusySlot, error) {
 	var slots []dto.BusySlot
 	err := r.db.Raw(`
 		SELECT id AS booking_id, start_time, end_time, status
 		FROM bookings
-		WHERE resource_id = ?
+		WHERE user_id = ?
+		  AND resource_id = ?
 		  AND status <> 'CANCELLED'
 		  AND DATE(start_time) = ?
 		ORDER BY start_time
-	`, resourceID, date).Scan(&slots).Error
+	`, userID, resourceID, date).Scan(&slots).Error
 	if err != nil {
 		return nil, err
 	}

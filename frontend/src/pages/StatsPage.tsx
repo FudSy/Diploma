@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { getAdminBookings, getStats } from "../api";
 import type { AdminBooking, StatsOverview } from "../types";
+import { useToast } from "../components/Toast";
+import { Skeleton } from "../components/Skeleton";
 
 interface Props {
   token: string;
@@ -47,9 +49,9 @@ function Bar({ value, max, color }: { value: number; max: number; color: string 
 }
 
 export function StatsPage({ token }: Props) {
+  const toast = useToast();
   const [stats, setStats] = useState<StatsOverview | null>(null);
   const [bookings, setBookings] = useState<AdminBooking[]>([]);
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [bookingFilter, setBookingFilter] = useState("");
 
@@ -60,12 +62,13 @@ export function StatsPage({ token }: Props) {
         setStats(s);
         setBookings(b);
       } catch (err) {
-        setError((err as Error).message);
+        toast.error((err as Error).message);
       } finally {
         setLoading(false);
       }
     }
     void load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   const maxTypeCount = stats ? Math.max(...stats.bookings_by_type.map((t) => t.count), 1) : 1;
@@ -83,15 +86,34 @@ export function StatsPage({ token }: Props) {
     );
   });
 
-  if (loading) return <div className="page"><p className="text-muted">Загрузка статистики...</p></div>;
+  if (loading) {
+    return (
+      <section className="page">
+        <div className="page-header"><h2>Аналитика</h2></div>
+        <div className="kpi-grid">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="kpi-card"><Skeleton height={32} /><Skeleton height={12} style={{ marginTop: 8 }} /></div>
+          ))}
+        </div>
+        <div className="stats-grid">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="panel">
+              <Skeleton width="40%" height={16} />
+              <div style={{ display: "grid", gap: 12, marginTop: 16 }}>
+                {Array.from({ length: 4 }).map((__, j) => <Skeleton key={j} height={14} />)}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="page">
       <div className="page-header">
         <h2>Аналитика</h2>
       </div>
-
-      {error && <p className="error">{error}</p>}
 
       {stats && (
         <>

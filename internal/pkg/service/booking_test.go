@@ -14,8 +14,8 @@ type bookingRepoMock struct {
 	getAllByUserFn   func(userID uuid.UUID) ([]dto.BookingResponse, error)
 	getAllFn         func() ([]dto.AdminBookingResponse, error)
 	getByIDFn        func(id uuid.UUID) (dto.BookingResponse, error)
-	hasTimeOverlapFn func(resourceID uuid.UUID, startTime, endTime time.Time) (bool, error)
-	getBusySlotsFn   func(resourceID uuid.UUID, date string) ([]dto.BusySlot, error)
+	hasTimeOverlapFn func(userID, resourceID uuid.UUID, startTime, endTime time.Time) (bool, error)
+	getBusySlotsFn   func(userID, resourceID uuid.UUID, date string) ([]dto.BusySlot, error)
 	updateFn         func(id uuid.UUID, input dto.UpdateBookingRequest) error
 	deleteFn         func(id uuid.UUID) error
 }
@@ -32,8 +32,8 @@ func (m *bookingRepoMock) GetById(id uuid.UUID) (dto.BookingResponse, error) {
 	return m.getByIDFn(id)
 }
 
-func (m *bookingRepoMock) HasTimeOverlap(resourceID uuid.UUID, startTime, endTime time.Time) (bool, error) {
-	return m.hasTimeOverlapFn(resourceID, startTime, endTime)
+func (m *bookingRepoMock) HasTimeOverlap(userID, resourceID uuid.UUID, startTime, endTime time.Time) (bool, error) {
+	return m.hasTimeOverlapFn(userID, resourceID, startTime, endTime)
 }
 
 func (m *bookingRepoMock) Update(id uuid.UUID, input dto.UpdateBookingRequest) error {
@@ -51,11 +51,19 @@ func (m *bookingRepoMock) GetAll() ([]dto.AdminBookingResponse, error) {
 	return []dto.AdminBookingResponse{}, nil
 }
 
-func (m *bookingRepoMock) GetBusySlots(resourceID uuid.UUID, date string) ([]dto.BusySlot, error) {
+func (m *bookingRepoMock) GetBusySlots(userID, resourceID uuid.UUID, date string) ([]dto.BusySlot, error) {
 	if m.getBusySlotsFn != nil {
-		return m.getBusySlotsFn(resourceID, date)
+		return m.getBusySlotsFn(userID, resourceID, date)
 	}
 	return []dto.BusySlot{}, nil
+}
+
+func (m *bookingRepoMock) GetCalendarBookingByID(id uuid.UUID) (dto.CalendarBooking, error) {
+	return dto.CalendarBooking{}, nil
+}
+
+func (m *bookingRepoMock) GetCalendarBookingsByUser(userID uuid.UUID) ([]dto.CalendarBooking, error) {
+	return []dto.CalendarBooking{}, nil
 }
 
 func TestBookingService_Create_StartTimeMustBeFuture(t *testing.T) {
@@ -64,7 +72,7 @@ func TestBookingService_Create_StartTimeMustBeFuture(t *testing.T) {
 			createFn:         func(userID uuid.UUID, input dto.CreateBookingRequest) (uuid.UUID, error) { return uuid.New(), nil },
 			getAllByUserFn:   func(userID uuid.UUID) ([]dto.BookingResponse, error) { return nil, nil },
 			getByIDFn:        func(id uuid.UUID) (dto.BookingResponse, error) { return dto.BookingResponse{}, nil },
-			hasTimeOverlapFn: func(resourceID uuid.UUID, startTime, endTime time.Time) (bool, error) { return false, nil },
+			hasTimeOverlapFn: func(userID, resourceID uuid.UUID, startTime, endTime time.Time) (bool, error) { return false, nil },
 			updateFn:         func(id uuid.UUID, input dto.UpdateBookingRequest) error { return nil },
 			deleteFn:         func(id uuid.UUID) error { return nil },
 		},
@@ -87,7 +95,7 @@ func TestBookingService_Create_Overlap(t *testing.T) {
 			createFn:       func(userID uuid.UUID, input dto.CreateBookingRequest) (uuid.UUID, error) { return uuid.New(), nil },
 			getAllByUserFn: func(userID uuid.UUID) ([]dto.BookingResponse, error) { return nil, nil },
 			getByIDFn:      func(id uuid.UUID) (dto.BookingResponse, error) { return dto.BookingResponse{}, nil },
-			hasTimeOverlapFn: func(resourceID uuid.UUID, startTime, endTime time.Time) (bool, error) {
+			hasTimeOverlapFn: func(userID, resourceID uuid.UUID, startTime, endTime time.Time) (bool, error) {
 				return true, nil
 			},
 			updateFn: func(id uuid.UUID, input dto.UpdateBookingRequest) error { return nil },
@@ -115,7 +123,7 @@ func TestBookingService_Create_Success(t *testing.T) {
 			},
 			getAllByUserFn:   func(userID uuid.UUID) ([]dto.BookingResponse, error) { return nil, nil },
 			getByIDFn:        func(id uuid.UUID) (dto.BookingResponse, error) { return dto.BookingResponse{}, nil },
-			hasTimeOverlapFn: func(resourceID uuid.UUID, startTime, endTime time.Time) (bool, error) { return false, nil },
+			hasTimeOverlapFn: func(userID, resourceID uuid.UUID, startTime, endTime time.Time) (bool, error) { return false, nil },
 			updateFn:         func(id uuid.UUID, input dto.UpdateBookingRequest) error { return nil },
 			deleteFn:         func(id uuid.UUID) error { return nil },
 		},
@@ -144,7 +152,7 @@ func TestBookingService_PassThroughMethods(t *testing.T) {
 			createFn:         func(userID uuid.UUID, input dto.CreateBookingRequest) (uuid.UUID, error) { return uuid.New(), nil },
 			getAllByUserFn:   func(gotUserID uuid.UUID) ([]dto.BookingResponse, error) { return nil, repoErr },
 			getByIDFn:        func(id uuid.UUID) (dto.BookingResponse, error) { return dto.BookingResponse{}, repoErr },
-			hasTimeOverlapFn: func(resourceID uuid.UUID, startTime, endTime time.Time) (bool, error) { return false, nil },
+			hasTimeOverlapFn: func(userID, resourceID uuid.UUID, startTime, endTime time.Time) (bool, error) { return false, nil },
 			updateFn:         func(id uuid.UUID, input dto.UpdateBookingRequest) error { return repoErr },
 			deleteFn:         func(id uuid.UUID) error { return repoErr },
 		},

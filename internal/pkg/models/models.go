@@ -12,13 +12,14 @@ type User struct {
 	Email        string    `gorm:"unique;not null"`
 	Name         string    `gorm:"not null;default:''"`
 	Surname      string    `gorm:"not null;default:''"`
-	PasswordHash string    `gorm:"not null"`
-	FullName     string    `gorm:"not null"`
-	Role         string    `gorm:"type:varchar(20);default:'USER'"`
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	PasswordHash  string    `gorm:"not null"`
+	FullName      string    `gorm:"not null"`
+	Role          string    `gorm:"type:varchar(20);default:'USER'"`
+	CalendarToken string    `gorm:"type:varchar(64);index"`
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
 
-	Bookings []Booking `gorm:"foreignKey:UserID"`
+	Bookings []Booking `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
 
 func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
@@ -40,7 +41,7 @@ type Resource struct {
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 
-	Bookings []Booking `gorm:"foreignKey:ResourceID"`
+	Bookings []Booking `gorm:"foreignKey:ResourceID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
 
 func (r *Resource) BeforeCreate(tx *gorm.DB) (err error) {

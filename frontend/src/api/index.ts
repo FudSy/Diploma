@@ -1,5 +1,17 @@
-import { apiRequest, apiUpload } from "./client";
-import type { AdminBooking, Booking, BusySlot, LoginRequest, MeResponse, RegisterRequest, Resource, ResourceType, StatsOverview } from "../types";
+import { apiDownload, apiRequest, apiUpload } from "./client";
+import type {
+  AdminBooking,
+  Booking,
+  BusySlot,
+  CalendarFeedResponse,
+  GoogleLinkResponse,
+  LoginRequest,
+  MeResponse,
+  RegisterRequest,
+  Resource,
+  ResourceType,
+  StatsOverview
+} from "../types";
 
 interface TokenResponse {
   token: string;
@@ -112,4 +124,20 @@ export function getAdminBookings(token: string): Promise<AdminBooking[]> {
 
 export function getResourceAvailability(token: string, resourceId: string, date: string): Promise<{ date: string; busy_slots: BusySlot[] }> {
   return apiRequest<{ date: string; busy_slots: BusySlot[] }>(`/resources/${resourceId}/availability?date=${date}`, { token });
+}
+
+export function downloadBookingICS(token: string, bookingId: string): Promise<void> {
+  return apiDownload(`/bookings/${bookingId}/ics`, token, `booking-${bookingId}.ics`);
+}
+
+export function getBookingGoogleLink(token: string, bookingId: string): Promise<GoogleLinkResponse> {
+  return apiRequest<GoogleLinkResponse>(`/bookings/${bookingId}/google-link`, { token });
+}
+
+export function getMyCalendarFeed(token: string): Promise<CalendarFeedResponse> {
+  return apiRequest<CalendarFeedResponse>("/me/calendar", { token });
+}
+
+export function rotateMyCalendarFeed(token: string): Promise<CalendarFeedResponse> {
+  return apiRequest<CalendarFeedResponse>("/me/calendar/rotate", { method: "POST", token });
 }

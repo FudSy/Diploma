@@ -85,7 +85,7 @@ type bookingSvcMock struct {
 	getAllFn       func(userID uuid.UUID) ([]dto.BookingResponse, error)
 	getAllAdminFn  func() ([]dto.AdminBookingResponse, error)
 	getByIDFn      func(bookingID uuid.UUID) (dto.BookingResponse, error)
-	getBusySlotsFn func(resourceID uuid.UUID, date string) ([]dto.BusySlot, error)
+	getBusySlotsFn func(userID, resourceID uuid.UUID, date string) ([]dto.BusySlot, error)
 	updateFn       func(userID, bookingID uuid.UUID, input dto.UpdateBookingRequest) error
 	deleteFn       func(userID, bookingID uuid.UUID) error
 }
@@ -105,9 +105,9 @@ func (m *bookingSvcMock) GetAllAdmin() ([]dto.AdminBookingResponse, error) {
 func (m *bookingSvcMock) GetById(bookingID uuid.UUID) (dto.BookingResponse, error) {
 	return m.getByIDFn(bookingID)
 }
-func (m *bookingSvcMock) GetBusySlots(resourceID uuid.UUID, date string) ([]dto.BusySlot, error) {
+func (m *bookingSvcMock) GetBusySlots(userID, resourceID uuid.UUID, date string) ([]dto.BusySlot, error) {
 	if m.getBusySlotsFn != nil {
-		return m.getBusySlotsFn(resourceID, date)
+		return m.getBusySlotsFn(userID, resourceID, date)
 	}
 	return []dto.BusySlot{}, nil
 }

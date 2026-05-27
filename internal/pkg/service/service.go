@@ -31,13 +31,22 @@ type Booking interface {
 	GetAll(userID uuid.UUID) ([]dto.BookingResponse, error)
 	GetAllAdmin() ([]dto.AdminBookingResponse, error)
 	GetById(bookingID uuid.UUID) (dto.BookingResponse, error)
-	GetBusySlots(resourceID uuid.UUID, date string) ([]dto.BusySlot, error)
+	GetBusySlots(userID, resourceID uuid.UUID, date string) ([]dto.BusySlot, error)
 	Update(userID, bookingID uuid.UUID, input dto.UpdateBookingRequest) error
 	Delete(userID, bookingID uuid.UUID) error
 }
 
 type Analytics interface {
 	GetOverview() (dto.StatsOverview, error)
+}
+
+type Calendar interface {
+	EnsureToken(userID uuid.UUID) (string, error)
+	RotateToken(userID uuid.UUID) (string, error)
+	BookingsByToken(token string) ([]dto.CalendarBooking, dto.User, error)
+	GetBookingForUser(bookingID, userID uuid.UUID, isAdmin bool) (dto.CalendarBooking, error)
+	BuildICS(bookings []dto.CalendarBooking, calName string) string
+	BuildGoogleLink(bk dto.CalendarBooking) string
 }
 
 type ResourceType interface {
@@ -54,6 +63,7 @@ type Service struct {
 	Booking
 	ResourceType
 	Analytics
+	Calendar
 }
 
 func NewService(repos *repository.Repository) *Service {
@@ -63,5 +73,6 @@ func NewService(repos *repository.Repository) *Service {
 		Booking:       NewBookingService(repos.Booking, repos.Resource),
 		ResourceType:  NewResourceTypeService(repos.ResourceType),
 		Analytics:     NewStatsService(repos.Stats),
+		Calendar:      NewCalendarService(repos.Booking, repos.Authorization),
 	}
 }
